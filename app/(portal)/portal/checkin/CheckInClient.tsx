@@ -113,7 +113,7 @@ export default function CheckInClient({ parent, sessions }: { parent: Parent; se
     else          { setStep('session'); setSession(null); setPkg(null) }
   }
 
-  const currentStepIdx = step === 'qr' ? -1 : steps.indexOf(step as typeof steps[number])
+  const currentStepIdx = step === 'qr' ? -1 : (steps as readonly string[]).indexOf(step)
 
   return (
     <div className="max-w-md mx-auto px-5 pt-8 pb-10 space-y-6">
