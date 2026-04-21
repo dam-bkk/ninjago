@@ -3,13 +3,15 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { Home, CalendarDays, CreditCard, Cake, Menu, X, LogOut } from 'lucide-react'
+import { Home, CalendarDays, CreditCard, Cake, Menu, X, LogOut, HelpCircle } from 'lucide-react'
 import { useLang, t } from '@/lib/lang-context'
+import Onboarding from './Onboarding'
 
 export default function PortalBottomNav() {
   const pathname = usePathname()
   const router = useRouter()
   const [open, setOpen] = useState(false)
+  const [showOnboarding, setShowOnboarding] = useState(false)
   const { lang } = useLang()
   const d = t(lang)
 
@@ -76,6 +78,16 @@ export default function PortalBottomNav() {
               )
             })}
 
+            {/* How it works */}
+            <button
+              onClick={() => { setOpen(false); setShowOnboarding(true) }}
+              className="flex flex-col items-center justify-center gap-2 rounded-2xl py-4 px-2 transition-all active:scale-95"
+              style={{ background: '#1a3a5c', color: 'rgba(255,255,255,0.85)' }}
+            >
+              <HelpCircle size={20} strokeWidth={2} />
+              <span className="text-xs font-bold text-center leading-tight">How it<br/>works</span>
+            </button>
+
             {/* Sign out */}
             <button
               onClick={() => { setOpen(false); handleLogout() }}
@@ -87,6 +99,10 @@ export default function PortalBottomNav() {
             </button>
           </div>
         </div>
+      )}
+
+      {showOnboarding && (
+        <Onboarding forceShow={showOnboarding} onClose={() => setShowOnboarding(false)} />
       )}
     </>
   )

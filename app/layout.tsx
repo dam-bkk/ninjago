@@ -18,19 +18,19 @@ const fredoka = Fredoka({
 
 export const metadata: Metadata = {
   title: 'Ninja Academy',
-  description: 'Ninja Academy — Bangkok',
+  description: 'Bangkok\'s premier ninja & BJJ academy for kids. Book sessions, track credits, and manage your child\'s martial arts journey — all in one app.',
   manifest: '/manifest.json',
   icons: { icon: '/icon.png', apple: '/apple-icon.png' },
   openGraph: {
-    title: 'Ninja Academy',
-    description: 'Ninja Academy — Bangkok',
-    images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'Ninja Academy' }],
+    title: 'Ninja Academy Bangkok',
+    description: 'Bangkok\'s premier ninja & BJJ academy for kids. Book sessions, track credits, and manage your child\'s martial arts journey — all in one app.',
+    images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'Ninja Academy Bangkok' }],
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Ninja Academy',
-    description: 'Ninja Academy — Bangkok',
+    title: 'Ninja Academy Bangkok',
+    description: 'Bangkok\'s premier ninja & BJJ academy for kids. Book sessions, track credits, and manage your child\'s martial arts journey — all in one app.',
     images: ['/og-image.jpg'],
   },
 }

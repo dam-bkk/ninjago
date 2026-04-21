@@ -226,7 +226,7 @@ export default async function AdminDashboard() {
         </h2>
         <div className="flex flex-wrap gap-3">
           <a href="/admin/students/new" className="btn btn-primary">+ Add student</a>
-          <a href="/admin/packages/new" className="btn btn-primary">+ Record payment</a>
+          <a href="/admin/students" className="btn btn-primary">+ Record payment</a>
           <a href="/admin/schedule" className="btn btn-secondary">View schedule</a>
           <a href="/admin/cashflow" className="btn btn-secondary">Cashflow</a>
         </div>

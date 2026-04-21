@@ -104,20 +104,28 @@ const SLIDES = [
   },
 ]
 
-export default function Onboarding() {
+export default function Onboarding({ forceShow, onClose }: { forceShow?: boolean; onClose?: () => void } = {}) {
   const [visible, setVisible] = useState(false)
   const [slide, setSlide] = useState(0)
   const startX = useRef<number | null>(null)
 
   useEffect(() => {
-    if (!localStorage.getItem('ninja-onboarding-done')) {
+    if (forceShow) {
+      setSlide(0)
       setVisible(true)
     }
-  }, [])
+  }, [forceShow])
+
+  useEffect(() => {
+    if (!forceShow && !localStorage.getItem('ninja-onboarding-done')) {
+      setVisible(true)
+    }
+  }, [forceShow])
 
   function dismiss() {
     localStorage.setItem('ninja-onboarding-done', '1')
     setVisible(false)
+    onClose?.()
   }
 
   function next() {
