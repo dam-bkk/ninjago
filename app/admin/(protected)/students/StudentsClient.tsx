@@ -49,13 +49,14 @@ export default function StudentsClient({ students }: { students: Student[] }) {
     <>
       {/* Search */}
       <div className="relative">
-        <Search size={16} strokeWidth={2.5} className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: '#94A3B8' }} />
+        <Search size={16} strokeWidth={2.5} style={{ color: '#94A3B8', position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', zIndex: 1 }} />
         <input
           type="text"
           value={query}
           onChange={e => setQuery(e.target.value)}
           placeholder="Search by name, parent, or location…"
-          className="input pl-9 w-full"
+          className="input w-full"
+          style={{ paddingLeft: '36px' }}
           autoComplete="off"
         />
       </div>
