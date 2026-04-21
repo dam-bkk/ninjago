@@ -21,24 +21,25 @@ function waPhone(raw: string) {
 }
 
 function buildMessage(info: SuccessInfo, portalUrl: string) {
-  const greeting = info.parentName ? `Bonjour ${info.parentName}! ` : 'Bonjour! '
+  const greeting = info.parentName ? `Hi ${info.parentName}! ` : 'Hi! '
   if (info.isExisting) {
     return (
       `${greeting}🥷\n\n` +
-      `${info.studentName} vient d'être inscrit(e) chez Ninja GO.\n\n` +
-      `Réservez ses sessions depuis le portail parent:\n` +
+      `${info.studentName} has just been registered at Ninja Academy!\n\n` +
+      `Access the parent portal for booking:\n` +
       `🔗 ${portalUrl}/login\n\n` +
-      `Utilisez votre numéro et votre code PIN habituels.`
+      `Use your usual phone number and PIN.\n\n` +
+      `See you soon! 🤸`
     )
   }
   return (
     `${greeting}🥷\n\n` +
-    `${info.studentName} vient d'être inscrit(e) chez Ninja GO!\n\n` +
-    `Accédez au portail parent pour réserver:\n` +
+    `${info.studentName} has just been registered at Ninja Academy!\n\n` +
+    `Access the parent portal for booking:\n` +
     `🔗 ${portalUrl}/login\n\n` +
-    `📱 Numéro: ${info.parentPhone}\n` +
-    `🔑 Code PIN: ${info.pin}\n\n` +
-    `À bientôt! 🤸`
+    `📱 Phone: ${info.parentPhone}\n` +
+    `🔑 PIN: ${info.pin}\n\n` +
+    `See you soon! 🤸`
   )
 }
 
