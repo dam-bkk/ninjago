@@ -29,3 +29,26 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const student = await prisma.student.update({ where: { id: parseInt(id) }, data })
   return NextResponse.json({ student })
 }
+
+export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const payload = await auth()
+  if (!payload) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (payload.role !== 'SUPER_ADMIN' && payload.role !== 'ADMIN') {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+
+  const { id } = await params
+  const studentId = parseInt(id)
+
+  // Delete in dependency order
+  await prisma.ledgerEntry.deleteMany({ where: { studentId } })
+  await prisma.dropInPayment.deleteMany({ where: { attendance: { studentId } } })
+  await prisma.attendance.deleteMany({ where: { studentId } })
+  await prisma.reservation.deleteMany({ where: { studentId } })
+  await prisma.checkInToken.deleteMany({ where: { studentId } })
+  await prisma.studentPackage.deleteMany({ where: { studentId } })
+  await prisma.studentLocation.deleteMany({ where: { studentId } })
+  await prisma.student.delete({ where: { id: studentId } })
+
+  return NextResponse.json({ ok: true })
+}

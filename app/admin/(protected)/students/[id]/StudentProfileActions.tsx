@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { Pencil, Camera, KeyRound, X, Check, Loader2 } from 'lucide-react'
+import { Pencil, Camera, KeyRound, Trash2, X, Check, Loader2 } from 'lucide-react'
 
 type Props = {
   studentId: number
@@ -159,11 +159,62 @@ function ResetPinModal({ parentId, parentName, onClose }: {
   )
 }
 
+// ── Delete modal ──────────────────────────────────────────────
+function DeleteModal({ studentId, studentName, onClose }: {
+  studentId: number
+  studentName: string
+  onClose: () => void
+}) {
+  const router = useRouter()
+  const [deleting, setDeleting] = useState(false)
+  const [error, setError]       = useState('')
+
+  async function confirm() {
+    setDeleting(true)
+    const res = await fetch(`/api/admin/students/${studentId}`, { method: 'DELETE' })
+    if (!res.ok) {
+      setError('Failed to delete student')
+      setDeleting(false)
+      return
+    }
+    router.push('/admin/students')
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(4px)' }}
+      onClick={onClose}>
+      <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl"
+        onClick={e => e.stopPropagation()}>
+        <div className="p-5 border-b flex items-center justify-between" style={{ borderColor: '#E2E8F0' }}>
+          <p className="font-display font-semibold" style={{ color: '#DC2626' }}>Delete student</p>
+          <button onClick={onClose}><X size={18} style={{ color: '#94A3B8' }} /></button>
+        </div>
+        <div className="p-5 space-y-4">
+          <p className="text-sm font-semibold" style={{ color: '#64748B' }}>
+            This will permanently delete <span className="font-black" style={{ color: '#0A1628' }}>{studentName}</span> and all their attendance, reservations, and package history. This cannot be undone.
+          </p>
+          {error && <p className="text-xs font-bold" style={{ color: '#EF4444' }}>{error}</p>}
+          <div className="flex gap-3">
+            <button onClick={onClose} className="btn btn-secondary flex-1">Cancel</button>
+            <button onClick={confirm} disabled={deleting}
+              className="btn flex-1 font-bold"
+              style={{ background: '#DC2626', color: '#fff' }}>
+              {deleting ? <Loader2 size={14} className="animate-spin mx-auto" /> : 'Delete'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── Main export ───────────────────────────────────────────────
 export default function StudentProfileActions(props: Props) {
   const router = useRouter()
   const [showEdit, setShowEdit]         = useState(false)
   const [showResetPin, setShowResetPin] = useState(false)
+  const [showDelete, setShowDelete]     = useState(false)
   const [photoPreview, setPhotoPreview] = useState<string | null>(props.photoUrl)
   const [uploadingPhoto, setUploadingPhoto] = useState(false)
   const photoRef = useRef<HTMLInputElement>(null)
@@ -219,6 +270,11 @@ export default function StudentProfileActions(props: Props) {
             <KeyRound size={13} /> Reset PIN
           </button>
         )}
+        <button onClick={() => setShowDelete(true)}
+          className="btn flex items-center gap-1.5 text-xs font-bold"
+          style={{ background: '#FEF2F2', color: '#DC2626', border: '1px solid #FECACA' }}>
+          <Trash2 size={13} /> Delete
+        </button>
       </div>
 
       {showEdit && (
@@ -235,6 +291,13 @@ export default function StudentProfileActions(props: Props) {
           parentId={props.parentId}
           parentName={props.parentName}
           onClose={() => setShowResetPin(false)}
+        />
+      )}
+      {showDelete && (
+        <DeleteModal
+          studentId={props.studentId}
+          studentName={props.studentName}
+          onClose={() => setShowDelete(false)}
         />
       )}
     </>
