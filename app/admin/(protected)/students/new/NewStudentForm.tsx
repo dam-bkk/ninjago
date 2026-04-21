@@ -21,20 +21,22 @@ function waPhone(raw: string) {
 }
 
 function buildMessage(info: SuccessInfo, portalUrl: string) {
+  const firstName = info.studentName.split(' ')[0]
   const greeting = info.parentName ? `Hi ${info.parentName}! ` : 'Hi! '
   if (info.isExisting) {
     return (
       `${greeting}🥷\n\n` +
-      `Welcome! ${info.studentName} has just been registered at Ninja Academy!\n\n` +
+      `Welcome! ${firstName} has just been registered at Ninja Academy!\n\n` +
       `Access the parent portal for booking:\n` +
       `🔗 ${portalUrl}/login\n\n` +
-      `Use your usual phone number and PIN.\n\n` +
+      `📱 Phone: ${info.parentPhone}\n` +
+      `🔑 Use your existing PIN.\n\n` +
       `See you soon! 🤸`
     )
   }
   return (
     `${greeting}🥷\n\n` +
-    `Welcome! ${info.studentName} has just been registered at Ninja Academy!\n\n` +
+    `Welcome! ${firstName} has just been registered at Ninja Academy!\n\n` +
     `Access the parent portal for booking:\n` +
     `🔗 ${portalUrl}/login\n\n` +
     `📱 Phone: ${info.parentPhone}\n` +
