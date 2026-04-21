@@ -25,7 +25,7 @@ function buildMessage(info: SuccessInfo, portalUrl: string) {
   if (info.isExisting) {
     return (
       `${greeting}🥷\n\n` +
-      `${info.studentName} has just been registered at Ninja Academy!\n\n` +
+      `Welcome! ${info.studentName} has just been registered at Ninja Academy!\n\n` +
       `Access the parent portal for booking:\n` +
       `🔗 ${portalUrl}/login\n\n` +
       `Use your usual phone number and PIN.\n\n` +
@@ -34,7 +34,7 @@ function buildMessage(info: SuccessInfo, portalUrl: string) {
   }
   return (
     `${greeting}🥷\n\n` +
-    `${info.studentName} has just been registered at Ninja Academy!\n\n` +
+    `Welcome! ${info.studentName} has just been registered at Ninja Academy!\n\n` +
     `Access the parent portal for booking:\n` +
     `🔗 ${portalUrl}/login\n\n` +
     `📱 Phone: ${info.parentPhone}\n` +
