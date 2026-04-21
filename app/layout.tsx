@@ -21,6 +21,18 @@ export const metadata: Metadata = {
   description: 'Ninja Academy — Bangkok',
   manifest: '/manifest.json',
   icons: { icon: '/icon.png', apple: '/apple-icon.png' },
+  openGraph: {
+    title: 'Ninja Academy',
+    description: 'Ninja Academy — Bangkok',
+    images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'Ninja Academy' }],
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Ninja Academy',
+    description: 'Ninja Academy — Bangkok',
+    images: ['/og-image.jpg'],
+  },
 }
 
 export const viewport: Viewport = {
