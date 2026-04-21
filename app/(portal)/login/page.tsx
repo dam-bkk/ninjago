@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import LangSwitcher from '@/components/LangSwitcher'
 import { useLang, t, type Lang } from '@/lib/lang-context'
+import Onboarding from '@/app/(portal)/portal/Onboarding'
 
 type Step = 'phone' | 'pin'
 
@@ -11,6 +12,7 @@ export default function ParentLoginPage() {
   const router = useRouter()
   const { lang, setLang } = useLang()
   const [step, setStep] = useState<Step>('phone')
+  const [onboardingDone, setOnboardingDone] = useState(true) // true = hidden until we check storage
   const [phone, setPhone] = useState('')
   const [pin, setPin] = useState(['', '', '', ''])
   const [error, setError] = useState('')
@@ -24,6 +26,12 @@ export default function ParentLoginPage() {
   ]
 
   const d = t(lang)
+
+  useEffect(() => {
+    // Show onboarding if this is the first visit
+    const done = localStorage.getItem('ninja-onboarding-done')
+    setOnboardingDone(!!done)
+  }, [])
 
   useEffect(() => {
     if (step === 'pin') {
@@ -91,6 +99,10 @@ export default function ParentLoginPage() {
   }
 
   return (
+    <>
+    {!onboardingDone && (
+      <Onboarding forceShow={!onboardingDone} onClose={() => setOnboardingDone(true)} />
+    )}
     <div className="portal min-h-screen flex items-center justify-center px-5">
       <div className="w-full max-w-sm space-y-8">
 
@@ -209,5 +221,6 @@ export default function ParentLoginPage() {
 
       </div>
     </div>
+    </>
   )
 }
