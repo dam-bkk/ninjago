@@ -1,0 +1,2 @@
+ALTER TABLE "Parent" ADD COLUMN "termsAcceptedAt" TIMESTAMP(3);
+ALTER TABLE "Parent" ADD COLUMN "preferredLang" TEXT NOT NULL DEFAULT 'en';

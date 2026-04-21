@@ -1,0 +1,445 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── STAFF ────────────────────────────────────────────────
+
+model User {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  name         String
+  phone        String?
+  passwordHash String
+  role         Role     @default(COACH)
+  locationId   Int?
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  location      Location?      @relation(fields: [locationId], references: [id])
+  coachSessions CoachSession[]
+  attendance    Attendance[]
+}
+
+// ─── LOCATIONS ────────────────────────────────────────────
+
+model Location {
+  id      Int     @id @default(autoincrement())
+  name    String
+  address String?
+  qrToken String  @unique @default(cuid())
+
+  users            User[]
+  sessions         Session[]
+  events           Event[]
+  reservations     Reservation[]
+  attendance       Attendance[]
+  coachSessions    CoachSession[]
+  studentAccess    StudentLocation[]
+  announcements    Announcement[]
+  birthdayInquiries BirthdayInquiry[]
+  birthdaySlots    BirthdaySlot[]
+}
+
+// ─── PARENTS ──────────────────────────────────────────────
+
+model Parent {
+  id               Int       @id @default(autoincrement())
+  phone            String    @unique
+  name             String?
+  email            String?
+  pinHash          String
+  bookingToken     String    @unique @default(cuid())
+  termsAcceptedAt  DateTime?
+  preferredLang    String    @default("en")
+  createdAt        DateTime  @default(now())
+
+  students Student[]
+}
+
+// ─── STUDENTS ─────────────────────────────────────────────
+
+model Student {
+  id          Int       @id @default(autoincrement())
+  name        String
+  birthdate   DateTime?
+  age         Int?
+  photoUrl    String?
+  parentId    Int?
+  graduated   Boolean   @default(false)
+  graduatedAt DateTime?
+  active      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+
+  parent         Parent?           @relation(fields: [parentId], references: [id])
+  locations      StudentLocation[]
+  packages       StudentPackage[]
+  reservations   Reservation[]
+  attendance     Attendance[]
+  ledger         LedgerEntry[]
+  checkInTokens  CheckInToken[]
+}
+
+model StudentLocation {
+  studentId  Int
+  locationId Int
+
+  student  Student  @relation(fields: [studentId], references: [id])
+  location Location @relation(fields: [locationId], references: [id])
+
+  @@id([studentId, locationId])
+}
+
+// ─── PACKAGES ─────────────────────────────────────────────
+
+model Package {
+  id           Int         @id @default(autoincrement())
+  type         PackageType
+  creditType   CreditType
+  totalCredits Int
+  usedCredits  Int         @default(0)
+  pricePaid    Int
+  purchasedAt  DateTime    @default(now())
+  expiresAt    DateTime?
+  groupLabel   String?
+  notes        String?
+
+  holders         StudentPackage[]
+  payments        Payment[]
+  ledger          LedgerEntry[]
+  checkInTokens   CheckInToken[]
+}
+
+model StudentPackage {
+  studentId Int
+  packageId Int
+  isPrimary Boolean  @default(false)
+  addedAt   DateTime @default(now())
+
+  student Student @relation(fields: [studentId], references: [id])
+  package Package @relation(fields: [packageId], references: [id])
+
+  @@id([studentId, packageId])
+}
+
+// ─── SESSIONS ─────────────────────────────────────────────
+
+model Session {
+  id           Int         @id @default(autoincrement())
+  locationId   Int
+  name         String
+  sessionType  SessionType
+  creditType   CreditType
+  dayOfWeek    Int?
+  startTime    String
+  endTime      String
+  includeLunch Boolean     @default(false)
+  periodType   PeriodType  @default(REGULAR)
+  validFrom    DateTime?
+  validUntil   DateTime?
+  maxCapacity  Int?
+  active       Boolean     @default(true)
+
+  location        Location        @relation(fields: [locationId], references: [id])
+  reservations    Reservation[]
+  checkInTokens   CheckInToken[]
+}
+
+// ─── CALENDAR OVERRIDES ───────────────────────────────────
+// Mark a specific date as running a different period type
+// (e.g. a regular Monday becomes a VACATION day)
+
+model CalendarOverride {
+  id         Int        @id @default(autoincrement())
+  date       DateTime   @db.Date @unique
+  periodType PeriodType // overrides REGULAR for that date
+  note       String?
+  createdAt  DateTime   @default(now())
+}
+
+// ─── EVENTS (one-off) ─────────────────────────────────────
+
+model Event {
+  id          Int         @id @default(autoincrement())
+  locationId  Int
+  name        String
+  sessionType SessionType
+  creditType  CreditType?
+  date        DateTime    @db.Date
+  startTime   String
+  endTime     String
+  maxCapacity Int?
+  description String?
+  active      Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+
+  location Location @relation(fields: [locationId], references: [id])
+}
+
+// ─── RESERVATIONS ─────────────────────────────────────────
+
+model Reservation {
+  id         Int               @id @default(autoincrement())
+  studentId  Int
+  sessionId  Int
+  locationId Int
+  date       DateTime          @db.Date
+  status     ReservationStatus @default(EXPECTED)
+  createdAt  DateTime          @default(now())
+
+  student    Student    @relation(fields: [studentId], references: [id])
+  session    Session    @relation(fields: [sessionId], references: [id])
+  location   Location   @relation(fields: [locationId], references: [id])
+  attendance Attendance?
+}
+
+// ─── ATTENDANCE ───────────────────────────────────────────
+
+model Attendance {
+  id            Int      @id @default(autoincrement())
+  studentId     Int
+  reservationId Int?     @unique
+  locationId    Int
+  coachId       Int?
+  date          DateTime @db.Date
+  checkedInAt   DateTime @default(now())
+  lunch         Boolean  @default(false)
+  isDropIn      Boolean  @default(false)
+
+  student     Student        @relation(fields: [studentId], references: [id])
+  reservation Reservation?   @relation(fields: [reservationId], references: [id])
+  location    Location       @relation(fields: [locationId], references: [id])
+  coach       User?          @relation(fields: [coachId], references: [id])
+  ledger      LedgerEntry?
+  dropIn      DropInPayment?
+}
+
+model DropInPayment {
+  id           Int           @id @default(autoincrement())
+  attendanceId Int           @unique
+  amount       Int
+  method       PaymentMethod
+  paidAt       DateTime      @default(now())
+
+  attendance Attendance @relation(fields: [attendanceId], references: [id])
+}
+
+model LedgerEntry {
+  id           Int      @id @default(autoincrement())
+  studentId    Int
+  packageId    Int
+  attendanceId Int      @unique
+  creditsUsed  Int      @default(1)
+  balanceAfter Int
+  createdAt    DateTime @default(now())
+
+  student    Student    @relation(fields: [studentId], references: [id])
+  package    Package    @relation(fields: [packageId], references: [id])
+  attendance Attendance @relation(fields: [attendanceId], references: [id])
+}
+
+// ─── COACH CLOCK-IN ───────────────────────────────────────
+
+model CoachSession {
+  id         Int       @id @default(autoincrement())
+  coachId    Int
+  locationId Int
+  clockIn    DateTime  @default(now())
+  clockOut   DateTime?
+
+  coach    User     @relation(fields: [coachId], references: [id])
+  location Location @relation(fields: [locationId], references: [id])
+}
+
+// ─── PAYMENTS ─────────────────────────────────────────────
+
+model Payment {
+  id        Int           @id @default(autoincrement())
+  packageId Int
+  amount    Int
+  method    PaymentMethod
+  paidAt    DateTime      @default(now())
+  notes     String?
+
+  package Package @relation(fields: [packageId], references: [id])
+}
+
+// ─── PRICING ──────────────────────────────────────────────
+
+model PackagePrice {
+  id           Int         @id @default(autoincrement())
+  packageType  PackageType
+  label        String
+  price        Int
+  credits      Int
+  validityMonths Int
+  dropInPrice  Int?
+  description  String?
+  highlighted  Boolean     @default(false)
+  active       Boolean     @default(true)
+}
+
+// ─── ANNOUNCEMENTS ────────────────────────────────────────
+
+model Announcement {
+  id          Int              @id @default(autoincrement())
+  title       String
+  body        String
+  type        AnnouncementType
+  imageUrl    String?
+  ctaLabel    String?
+  ctaUrl      String?
+  promoCode   String?
+  discountPct Int?
+  locationId  Int?
+  showFrom    DateTime
+  showUntil   DateTime
+  active      Boolean          @default(true)
+  createdAt   DateTime         @default(now())
+
+  location Location? @relation(fields: [locationId], references: [id])
+}
+
+// ─── SETTINGS ─────────────────────────────────────────────
+
+model Settings {
+  id              Int    @id @default(1)
+  promptpayNumber String @default("")
+  whatsappNumber  String @default("")
+  promptpayQrUrl  String @default("")
+}
+
+// ─── ENUMS ────────────────────────────────────────────────
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  COACH
+}
+
+enum CreditType {
+  CLASS         // regular classes (Ninja, BJJ)
+  CAMP          // regular camp 9am–1pm
+  CAMP_EXTENDED // extended camp 9am–2:30pm
+}
+
+enum PackageType {
+  CLASS_10
+  CLASS_20
+  CAMP_REGULAR_10
+  CAMP_REGULAR_20
+  CAMP_EXTENDED_10
+  CAMP_EXTENDED_20
+}
+
+enum SessionType {
+  NINJA_CLASS
+  BJJ_COMBO
+  CAMP_REGULAR
+  CAMP_EXTENDED
+}
+
+enum PeriodType {
+  REGULAR
+  VACATION
+  SPECIAL
+}
+
+enum ReservationStatus {
+  EXPECTED
+  CHECKED_IN
+  NO_SHOW
+  CANCELLED
+}
+
+enum PaymentMethod {
+  CASH
+  TRANSFER
+  QR_PROMPTPAY
+}
+
+enum AnnouncementType {
+  EVENT
+  PROMO
+  NEWS
+  CAMP
+  SCHEDULE
+}
+
+// ─── CHECK-IN TOKENS (parent QR) ──────────────────────────
+
+model CheckInToken {
+  id        Int       @id @default(autoincrement())
+  token     String    @unique @default(cuid())
+  studentId Int
+  sessionId Int
+  packageId Int
+  date      DateTime  @db.Date
+  usedAt    DateTime?
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
+
+  student Student @relation(fields: [studentId], references: [id])
+  session Session @relation(fields: [sessionId], references: [id])
+  package Package @relation(fields: [packageId], references: [id])
+}
+
+// ─── BIRTHDAY PARTIES ─────────────────────────────────────
+
+model BirthdayInquiry {
+  id              Int                   @id @default(autoincrement())
+  // Parent info
+  parentName      String
+  phone           String
+  email           String?
+  commApp         String?               // "WhatsApp" | "LINE"
+  lineId          String?
+  // Birthday kid
+  kidName         String
+  kidGender       String?               // "Girl" | "Boy"
+  kidAge          Int
+  favSuperhero    String?
+  favColor        String?
+  // Optional 2nd kid (member portal)
+  kid2Name        String?
+  kid2Gender      String?
+  kid2Age         Int?
+  // Event details
+  guestCount      Int?
+  preferredDate   DateTime?             @db.Date
+  preferredTime   String?
+  locationId      Int?
+  notes           String?
+  // Meta
+  isMember        Boolean               @default(false)
+  status          BirthdayInquiryStatus @default(PENDING)
+  createdAt       DateTime              @default(now())
+
+  location Location? @relation(fields: [locationId], references: [id])
+}
+
+enum BirthdayInquiryStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
+
+// ─── BIRTHDAY SLOTS ───────────────────────────────────────
+
+model BirthdaySlot {
+  id         Int      @id @default(autoincrement())
+  locationId Int?
+  date       DateTime @db.Date
+  startTime  String
+  endTime    String
+  maxParties Int      @default(1)
+  booked     Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  location Location? @relation(fields: [locationId], references: [id])
+}
+
