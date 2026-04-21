@@ -373,15 +373,16 @@ enum AnnouncementType {
 // ─── CHECK-IN TOKENS (parent QR) ──────────────────────────
 
 model CheckInToken {
-  id        Int       @id @default(autoincrement())
-  token     String    @unique @default(cuid())
-  studentId Int
-  sessionId Int
-  packageId Int
-  date      DateTime  @db.Date
-  usedAt    DateTime?
-  expiresAt DateTime
-  createdAt DateTime  @default(now())
+  id              Int       @id @default(autoincrement())
+  token           String    @unique @default(cuid())
+  studentId       Int
+  sessionId       Int
+  packageId       Int
+  date            DateTime  @db.Date
+  usedAt          DateTime?
+  expiresAt       DateTime
+  creditReserved  Boolean   @default(false)
+  createdAt       DateTime  @default(now())
 
   student Student @relation(fields: [studentId], references: [id])
   session Session @relation(fields: [sessionId], references: [id])

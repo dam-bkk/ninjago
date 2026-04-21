@@ -9,6 +9,7 @@ async function findToken(token: string) {
       session: { select: { id: true, name: true, startTime: true, endTime: true, locationId: true, location: { select: { name: true } }, creditType: true } },
       package: { select: { id: true, creditType: true, totalCredits: true, usedCredits: true, expiresAt: true, groupLabel: true } },
     },
+    // creditReserved is on the root record, included by default
   })
 }
 
@@ -40,7 +41,8 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ to
   const creditsLeft = record.package.totalCredits - record.package.usedCredits
   if (creditsLeft <= 0) return NextResponse.json({ error: 'Plus de crédits' }, { status: 400 })
 
-  // Run in transaction: reservation + attendance + ledger + increment usedCredits + mark token used
+  // Run in transaction: reservation + attendance + ledger + mark token used
+  // Credit was already reserved at QR generation time (creditReserved=true), so don't increment again
   const result = await prisma.$transaction(async tx => {
     // Upsert reservation
     let reservation = await tx.reservation.findFirst({
@@ -73,11 +75,18 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ to
       },
     })
 
-    // Increment package usedCredits
-    const updatedPackage = await tx.package.update({
-      where: { id: record.packageId },
-      data: { usedCredits: { increment: 1 } },
-    })
+    // Only increment usedCredits if credit wasn't already reserved at QR generation
+    let updatedPackage
+    if (!record.creditReserved) {
+      updatedPackage = await tx.package.update({
+        where: { id: record.packageId },
+        data: { usedCredits: { increment: 1 } },
+      })
+    } else {
+      updatedPackage = await tx.package.findUnique({ where: { id: record.packageId } })
+    }
+
+    const creditsAfter = updatedPackage!.totalCredits - updatedPackage!.usedCredits
 
     // Ledger entry
     await tx.ledgerEntry.create({
@@ -86,7 +95,7 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ to
         packageId: record.packageId,
         attendanceId: attendance.id,
         creditsUsed: 1,
-        balanceAfter: updatedPackage.totalCredits - updatedPackage.usedCredits,
+        balanceAfter: creditsAfter,
       },
     })
 
@@ -96,7 +105,7 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ to
       data: { usedAt: new Date() },
     })
 
-    return { student: record.student, session: record.session, creditsAfter: updatedPackage.totalCredits - updatedPackage.usedCredits }
+    return { student: record.student, session: record.session, creditsAfter }
   })
 
   return NextResponse.json({ success: true, ...result })

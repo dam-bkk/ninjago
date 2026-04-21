@@ -45,8 +45,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ token: existing.token })
   }
 
-  const record = await prisma.checkInToken.create({
-    data: { studentId, sessionId, packageId, date: targetDate, expiresAt },
+  // Create token and immediately reserve 1 credit
+  const record = await prisma.$transaction(async tx => {
+    const token = await tx.checkInToken.create({
+      data: { studentId, sessionId, packageId, date: targetDate, expiresAt, creditReserved: true },
+    })
+    await tx.package.update({
+      where: { id: packageId },
+      data: { usedCredits: { increment: 1 } },
+    })
+    return token
   })
 
   return NextResponse.json({ token: record.token }, { status: 201 })
