@@ -5,7 +5,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import {
   LayoutDashboard, Users, Package, CalendarDays,
-  TrendingUp, Sword, Menu, X, LogOut, Settings, Cake, Star, UserCog,
+  TrendingUp, Sword, Menu, X, LogOut, Settings, Cake, Star, UserCog, BookOpen,
 } from 'lucide-react'
 
 const NAV = [
@@ -19,6 +19,7 @@ const NAV = [
   { href: '/admin/coaches',   label: 'Staff',        Icon: UserCog },
   { href: '/admin/birthday',  label: 'Birthdays',    Icon: Cake },
   { href: '/admin/settings',  label: 'Settings',     Icon: Settings },
+  { href: '/admin/guide',     label: 'Staff guide',  Icon: BookOpen },
 ]
 
 export default function AdminNav({ role }: { role: string }) {
