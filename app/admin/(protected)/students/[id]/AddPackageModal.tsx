@@ -66,7 +66,8 @@ export default function AddPackageModal({ studentId, prices }: { studentId: numb
 
   const grouped: Record<string, PackagePrice[]> = {}
   for (const p of prices) {
-    const group = p.packageType.startsWith('CLASS') ? 'Class packs'
+    const group = p.packageType.startsWith('DROP_IN') ? 'Drop-in'
+      : p.packageType.startsWith('CLASS') ? 'Class packs'
       : p.packageType.includes('EXTENDED') ? 'Extended camp packs'
       : 'Camp packs'
     if (!grouped[group]) grouped[group] = []

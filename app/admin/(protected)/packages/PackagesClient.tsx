@@ -17,12 +17,15 @@ type PackagePrice = {
 }
 
 const PACKAGE_TYPES = [
-  { value: 'CLASS_10',         label: 'Class × 10',          creditType: 'CLASS' },
-  { value: 'CLASS_20',         label: 'Class × 20',          creditType: 'CLASS' },
-  { value: 'CAMP_REGULAR_10',  label: 'Camp Regular × 10',   creditType: 'CAMP' },
-  { value: 'CAMP_REGULAR_20',  label: 'Camp Regular × 20',   creditType: 'CAMP' },
-  { value: 'CAMP_EXTENDED_10', label: 'Camp Extended × 10',  creditType: 'CAMP_EXTENDED' },
-  { value: 'CAMP_EXTENDED_20', label: 'Camp Extended × 20',  creditType: 'CAMP_EXTENDED' },
+  { value: 'CLASS_10',              label: 'Class × 10',          creditType: 'CLASS' },
+  { value: 'CLASS_20',              label: 'Class × 20',          creditType: 'CLASS' },
+  { value: 'CAMP_REGULAR_10',       label: 'Camp Regular × 10',   creditType: 'CAMP' },
+  { value: 'CAMP_REGULAR_20',       label: 'Camp Regular × 20',   creditType: 'CAMP' },
+  { value: 'CAMP_EXTENDED_10',      label: 'Camp Extended × 10',  creditType: 'CAMP_EXTENDED' },
+  { value: 'CAMP_EXTENDED_20',      label: 'Camp Extended × 20',  creditType: 'CAMP_EXTENDED' },
+  { value: 'DROP_IN_CLASS',         label: 'Drop-in Class',        creditType: 'CLASS' },
+  { value: 'DROP_IN_CAMP',          label: 'Drop-in Camp',         creditType: 'CAMP' },
+  { value: 'DROP_IN_CAMP_EXTENDED', label: 'Drop-in Ext. Camp',   creditType: 'CAMP_EXTENDED' },
 ]
 
 function creditColor(t: string) {
