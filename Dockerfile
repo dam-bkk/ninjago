@@ -20,12 +20,17 @@ COPY --from=builder --chown=ninja:ninja /app/.next/standalone ./
 COPY --from=builder --chown=ninja:ninja /app/.next/static ./.next/static
 COPY --from=builder --chown=ninja:ninja /app/public ./public
 COPY --from=builder --chown=ninja:ninja /app/prisma ./prisma
+COPY --from=builder --chown=ninja:ninja /app/prisma.config.ts ./prisma.config.ts
 COPY --from=builder --chown=ninja:ninja /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder --chown=ninja:ninja /app/node_modules/@prisma ./node_modules/@prisma
+COPY --from=builder --chown=ninja:ninja /app/node_modules/prisma ./node_modules/prisma
+
+COPY --chown=ninja:ninja entrypoint.sh ./entrypoint.sh
+RUN chmod +x entrypoint.sh
 
 USER ninja
 EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-CMD ["node", "server.js"]
+CMD ["sh", "entrypoint.sh"]
